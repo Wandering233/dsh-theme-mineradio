@@ -1455,6 +1455,71 @@ html:not(:has(body[data-ds-dark-theme])) [data-dsh-aqua] [data-dsh-station-tuner
   background-color: transparent !important;
 }
 
+/* ---------- dsh-better-sidebar: panels join the glass family ----------
+   better-sidebar mounts a viewport-fixed host ([data-dsh-panel-host],
+   z-index 25) and paints its right panel / bottom panel with opaque token
+   fills (z-index 40 inside the host). Skin both panels with the SAME
+   recipe as the sidebar column — gradient glass fill, specular rim, and
+   blur-knob frost — so the plugin's surfaces read as one family with the
+   host chrome (frost and blur ride the same --dsh-aqua-frost /
+   --dsh-aqua-blur knobs as the left sidebar). The frost lives on a
+   ::before veil (a real backdrop-filter on the panel would re-anchor its
+   fixed descendants and clip them under overflow:hidden). [class*=]
+   selectors keep the CSS-module pass from hashing the plugin's names.
+   Desktop only (>=768px): narrow viewports keep the plugin's full-bleed
+   drawer layout untouched, and the floating margin would mis-seat the
+   toggle cluster there. */
+@media (min-width: 768px) {
+  [data-dsh-aqua][data-dsh-float] [data-dsh-panel-host] > [class*='panel'],
+  [data-dsh-aqua][data-dsh-float] [data-dsh-panel-host] > [class*='bottomPanel'] {
+    margin: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.26);
+    border-top-color: rgba(255, 255, 255, 0.50);
+    border-radius: 20px;
+    background: var(--dsh-aqua-glass-card-light);
+    box-shadow: 0 22px 64px rgb(38 26 8 / 0.16);
+    overflow: hidden;
+  }
+
+  [data-dsh-aqua][data-dsh-float] [data-dsh-panel-host] > [class*='panel']::before,
+  [data-dsh-aqua][data-dsh-float] [data-dsh-panel-host] > [class*='bottomPanel']::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    backdrop-filter: blur(var(--dsh-aqua-blur, 22px)) saturate(1.22) brightness(1.04);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  [data-dsh-aqua][data-dsh-float] body[data-ds-dark-theme] [data-dsh-panel-host] > [class*='panel'],
+  [data-dsh-aqua][data-dsh-float] body[data-ds-dark-theme] [data-dsh-panel-host] > [class*='bottomPanel'] {
+    border-color: rgba(255, 255, 255, 0.16);
+    border-top-color: rgba(255, 255, 255, 0.30);
+    background: var(--dsh-aqua-glass-card-dark);
+    box-shadow: 0 22px 64px rgb(0 0 0 / 0.30), 0 0 34px rgb(0 245 212 / 0.052), inset 0 -24px 58px rgb(0 0 0 / 0.16);
+  }
+
+  /* The open right panel floats 12px off the edges; the plugin's toggle
+     cluster is pinned to the viewport corner, so it must ride the same
+     12px offset to stay seated in the panel's tab strip. */
+  [data-dsh-aqua][data-dsh-float] body:not([data-dsh-sidebar-collapsed]) [data-dsh-panel-host] [data-dsh-toggle-cluster] {
+    top: calc(3px + 12px);
+    right: calc(10px + 12px);
+  }
+}
+
+/* ---------- Layer fix: settings dialog above the sidebar panels ----------
+   DSH renders the settings dialog as a viewport-fixed overlay (z-index
+   1000) INSIDE the sidebar column, and the float rules give that column
+   z-index 9 — a stacking context that traps the dialog below
+   better-sidebar's host layer (z-index 25 / panels 40). While a dialog is
+   open, raise the column above the host so the dialog never slides under
+   the plugin panels. */
+[data-dsh-aqua][data-dsh-float] [class*='sidebarCol']:has([role='dialog']) {
+  z-index: 50;
+}
+
 /* ---------- Reduced motion: keep the static look, drop every effect. ---------- */
 @media (prefers-reduced-motion: reduce) {
   [data-dsh-float] [data-phase='hero'],
