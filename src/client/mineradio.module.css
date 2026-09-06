@@ -1520,6 +1520,25 @@ html:not(:has(body[data-ds-dark-theme])) [data-dsh-aqua] [data-dsh-station-tuner
   z-index: 50;
 }
 
+/* ---------- Layout push follows the float gap ----------
+   better-sidebar reserves layout for an open panel by writing
+   --dsh-sidebar-width/--dsh-sidebar-height (frame padding / center column
+   margin). The floating glass panels sit 12px INSIDE the reserved edge, so
+   the conversation scrollbar (pinned to the reserved edge) would slide
+   under the panel. Extend the push by the same 12px while a panel is
+   actually open, keeping the scrollbar clear of the glass. */
+[data-dsh-aqua][data-dsh-float] body:has([data-dsh-panel-host] > [class*='panel']:not([class*='panelHidden'])) #root [data-dsh-frame] {
+  padding-right: calc(var(--dsh-sidebar-width, 0px) + 12px);
+}
+
+[data-dsh-aqua][data-dsh-float] body:has([data-dsh-panel-host] > [class*='panel']:not([class*='panelHidden'])) #root [data-dsh-frame] > [data-side='details'] {
+  transform: translateX(calc(0px - var(--dsh-sidebar-width, 0px) - 12px));
+}
+
+[data-dsh-aqua][data-dsh-float] body:has([data-dsh-panel-host] > [class*='bottomPanel']:not([class*='bottomPanelHidden'])) #root [data-dsh-center-col] {
+  margin-bottom: calc(var(--dsh-sidebar-height, 0px) + 12px);
+}
+
 /* ---------- Reduced motion: keep the static look, drop every effect. ---------- */
 @media (prefers-reduced-motion: reduce) {
   [data-dsh-float] [data-phase='hero'],
