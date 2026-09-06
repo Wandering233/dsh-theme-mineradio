@@ -1516,8 +1516,34 @@ html:not(:has(body[data-ds-dark-theme])) [data-dsh-aqua] [data-dsh-station-tuner
    better-sidebar's host layer (z-index 25 / panels 40). While a dialog is
    open, raise the column above the host so the dialog never slides under
    the plugin panels. */
-[data-dsh-aqua][data-dsh-float] [class*='sidebarCol']:has([role='dialog']) {
+[data-dsh-aqua][data-dsh-float] [class*='sidebarCol']:has([role='dialog']),
+[data-dsh-aqua][data-dsh-float] [class*='sidebarCol']:has([class*='overlay']) {
   z-index: 50;
+}
+
+/* ---------- Layer fix (structural): panels below the sidebar column ----------
+   The settings dialog mounts inside the sidebar column, whose float-mode
+   stacking context (z-index 9) traps the dialog's z-index 1000 — so the
+   dialog can only win against better-sidebar's host layer through the
+   sidebar column's own layer. The :has() rules above raise the column while
+   a dialog is open, but their match timing is not guaranteed on the first
+   open after a page load. Structural guarantee instead: on desktop, hold
+   the sidebar column at z-index 10 (constant) and drop the plugin host
+   layer to z-index 9 (from 25) — the dialog always stacks above the panels
+   with no dynamic matching, while the host stays above the session header
+   card (z-index 8, where the plugin's expand/collapse cluster sits) so the
+   toggle buttons are never hidden behind the header. Overlay layers
+   (z 20), the app overlay stack (100+) and ui-cordis (30) all still sit
+   above the host, matching the plugin's own intent. Narrow drawers stay on
+   the stock host layer (they cover the full viewport by design). */
+@media (min-width: 768px) {
+  [data-dsh-aqua][data-dsh-float] [class*='sidebarCol'] {
+    z-index: 10;
+  }
+
+  [data-dsh-aqua][data-dsh-float] [data-dsh-panel-host] {
+    z-index: 9;
+  }
 }
 
 /* ---------- Layout push follows the float gap ----------
