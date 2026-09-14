@@ -1589,7 +1589,18 @@ html:not(:has(body[data-ds-dark-theme])) [data-dsh-aqua] [data-dsh-station-tuner
     box-sizing: border-box;
     border: 1px solid rgba(255, 255, 255, 0.26);
     border-top-color: rgba(255, 255, 255, 0.50);
-    background: var(--dsh-aqua-glass-card-light);
+    /* The glass tokens are HIGHLIGHTS, not fills: at the shipped default frost
+       (14) the theme layer scales --dsh-aqua-frost to 0.28, landing every stop
+       near alpha 0.22. So the box carries its own layer, and that layer rides
+       the SAME knob every other surface of the theme uses -
+       --dsh-aqua-surface-frost, written as (frost + 20 points) / 50 - so this
+       panel tracks the frost slider exactly like the cards and beads do,
+       instead of a hardcoded alpha. dockkit paints no fill anywhere else here:
+       neither the header nor the body has one. */
+    background: var(--dsw-alias-bg-layer-2);
+    background:
+      var(--dsh-aqua-glass-card-light, none),
+      color-mix(in srgb, rgb(255 255 255) calc(62% * var(--dsh-aqua-surface-frost, 1)), transparent);
     box-shadow: 0 22px 64px rgb(38 26 8 / 0.16);
   }
 
@@ -1604,23 +1615,65 @@ html:not(:has(body[data-ds-dark-theme])) [data-dsh-aqua] [data-dsh-station-tuner
   }
 
   [data-dsh-aqua][data-dsh-float] body[data-ds-dark-theme] [data-dockkit-float] {
-    border-color: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.08);
     border-top-color: rgba(255, 255, 255, 0.30);
-    background: var(--dsh-aqua-glass-card-dark);
+    background: var(--dsw-alias-bg-layer-2);
+    background:
+      var(--dsh-aqua-glass-card-dark, none),
+      color-mix(in srgb, rgb(42 46 56) calc(62% * var(--dsh-aqua-surface-frost, 1)), transparent);
     box-shadow: 0 22px 64px rgb(0 0 0 / 0.30), 0 0 34px rgb(0 245 212 / 0.052), inset 0 -24px 58px rgb(0 0 0 / 0.16);
   }
 
-  /* The same surface in its docked (push) state, minus the float-only lift.
-     Only the fill and the rim are re-skinned; the native slide/visibility
-     transition and the layout push are left alone. */
+  /* The docked (push) right panel is the one that shows up in normal use: DSH
+     reserves layout for it and slides it in from the right edge, so the stock
+     rule parks it flush against that edge (absolute, right 0, top 0, bottom 0)
+     and it reads as a docked column rather than the floating pane the 0.18.x
+     plugin panel was. Inset it on the three edges that column owns - the left
+     edge is the centre column's business, and the rule below reserves that gap
+     - then skin it with the same recipe and the same frost knob as the rest of
+     the theme. */
   [data-dsh-aqua][data-dsh-float] [data-sidebar-right-panel] {
-    background: var(--dsh-aqua-glass-card-light);
-    border-left-color: rgba(255, 255, 255, 0.26);
+    top: 12px;
+    bottom: 12px;
+    right: 12px;
+    border: 1px solid rgba(122, 86, 28, 0.26);
+    border-top-color: rgba(255, 255, 255, 0.50);
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--dsw-alias-bg-base);
+    background:
+      var(--dsh-aqua-glass-card-light, none),
+      color-mix(in srgb, rgb(255 255 255) calc(62% * var(--dsh-aqua-surface-frost, 1)), transparent);
+    box-shadow: 0 22px 64px rgb(38 26 8 / 0.16);
+  }
+
+  [data-dsh-aqua][data-dsh-float] [data-sidebar-right-panel]::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    backdrop-filter: blur(var(--dsh-aqua-blur, 22px)) saturate(1.22) brightness(1.04);
+    pointer-events: none;
+    z-index: -1;
   }
 
   [data-dsh-aqua][data-dsh-float] body[data-ds-dark-theme] [data-sidebar-right-panel] {
-    background: var(--dsh-aqua-glass-card-dark);
-    border-left-color: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.08);
+    border-top-color: rgba(255, 255, 255, 0.30);
+    background: var(--dsw-alias-bg-base);
+    background:
+      var(--dsh-aqua-glass-card-dark, none),
+      color-mix(in srgb, rgb(42 46 56) calc(62% * var(--dsh-aqua-surface-frost, 1)), transparent);
+    box-shadow: 0 22px 64px rgb(0 0 0 / 0.30), 0 0 34px rgb(0 245 212 / 0.052), inset 0 -24px 58px rgb(0 0 0 / 0.16);
+  }
+
+  /* The panel keeps its full JS-computed width while being inset 12px from the
+     column's right edge, so 12px of it hangs over the centre column. Reserve
+     16px on the centre column - 12px to cover that overhang plus a 4px gap -
+     the same "extend the push by the float gap" idea the 0.18.x rules apply to
+     the bottom panel. */
+  [data-dsh-aqua][data-dsh-float] body:has([data-sidebar-right-panel='push'][data-sidebar-right-open]) [class*='centerCol'] {
+    padding-right: 16px;
   }
 }
 
