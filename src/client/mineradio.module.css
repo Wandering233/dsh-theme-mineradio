@@ -1636,6 +1636,14 @@ html:not(:has(body[data-ds-dark-theme])) [data-dsh-aqua] [data-dsh-station-tuner
     top: 12px;
     bottom: 12px;
     right: 12px;
+    /* Cap the width to the column instead of pushing the centre column around.
+       The composer is laid out with `margin: 0 auto` (its width comes from
+       --dsh-chat-content-width) while the bottom panel is positioned from the
+       column's border box, so narrowing the column moves them by DIFFERENT
+       amounts - the centred composer by 8px per side, the edge-anchored panel
+       by 16px on one side - and the terminal stops lining up with the composer.
+       Capping the panel leaves both of them untouched. */
+    max-width: calc(100% - 24px);
     border: 1px solid rgba(122, 86, 28, 0.26);
     border-top-color: rgba(255, 255, 255, 0.50);
     border-radius: 20px;
@@ -1667,14 +1675,12 @@ html:not(:has(body[data-ds-dark-theme])) [data-dsh-aqua] [data-dsh-station-tuner
     box-shadow: 0 22px 64px rgb(0 0 0 / 0.30), 0 0 34px rgb(0 245 212 / 0.052), inset 0 -24px 58px rgb(0 0 0 / 0.16);
   }
 
-  /* The panel keeps its full JS-computed width while being inset 12px from the
-     column's right edge, so 12px of it hangs over the centre column. Reserve
-     16px on the centre column - 12px to cover that overhang plus a 4px gap -
-     the same "extend the push by the float gap" idea the 0.18.x rules apply to
-     the bottom panel. */
-  [data-dsh-aqua][data-dsh-float] body:has([data-sidebar-right-panel='push'][data-sidebar-right-open]) [class*='centerCol'] {
-    padding-right: 16px;
-  }
+  /* Deliberately NO centre-column push here. The panel is capped inside its own
+     column instead (see the max-width above). Any push - padding OR margin -
+     moves the centred composer and the edge-anchored bottom panel by different
+     amounts, which is what broke the alignment between the terminal and the
+     composer above it. */
+}
 }
 
 /* ---------- Layer fix for 0.19.x: dockkit floats belong below the dialog too ----------
