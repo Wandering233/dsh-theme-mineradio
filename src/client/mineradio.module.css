@@ -1565,6 +1565,91 @@ html:not(:has(body[data-ds-dark-theme])) [data-dsh-aqua] [data-dsh-station-tuner
   margin-bottom: calc(var(--dsh-sidebar-height, 0px) + 12px);
 }
 
+/* ---------- better-sidebar 0.19.x: the right panel is now DSH's own sidebar ----------
+   From 0.19.0 the plugin stopped rendering the right panel. Its own host keeps
+   only the bottom panel (still covered by the 0.18.x rules above), and the
+   right column is DSH's native Sidebar (`dsh-client-ui-sidebar-right`), whose
+   floating windows are mounted by dockkit's FloatLayer. The plugin says so
+   itself: "The right column is DSH's native Sidebar, so no width is written."
+   That float box is `[data-dockkit-float]` — a viewport-fixed, user-draggable
+   surface with a native 20px radius and an OPAQUE `--dsw-alias-bg-layer-2`
+   fill, which is why the panel read as a solid slab again.
+
+   Two deliberate differences from the 0.18.x panel recipe above:
+   - no `margin`: the box positions itself with inline left/top/width/height
+     and is dragged/resized by the user, so an added margin would offset the
+     drag geometry (and the 20px radius is already native);
+   - `box-sizing: border-box` before the rim: the shell ships no global
+     border-box reset, so a bare 1px border would widen the box by 2px and
+     drift the resize geometry;
+   - the frost still rides a ::before veil: the box is `overflow: hidden`, so a
+     real backdrop-filter on it would clip its own descendants. */
+@media (min-width: 768px) {
+  [data-dsh-aqua][data-dsh-float] [data-dockkit-float] {
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.26);
+    border-top-color: rgba(255, 255, 255, 0.50);
+    background: var(--dsh-aqua-glass-card-light);
+    box-shadow: 0 22px 64px rgb(38 26 8 / 0.16);
+  }
+
+  [data-dsh-aqua][data-dsh-float] [data-dockkit-float]::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    backdrop-filter: blur(var(--dsh-aqua-blur, 22px)) saturate(1.22) brightness(1.04);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  [data-dsh-aqua][data-dsh-float] body[data-ds-dark-theme] [data-dockkit-float] {
+    border-color: rgba(255, 255, 255, 0.16);
+    border-top-color: rgba(255, 255, 255, 0.30);
+    background: var(--dsh-aqua-glass-card-dark);
+    box-shadow: 0 22px 64px rgb(0 0 0 / 0.30), 0 0 34px rgb(0 245 212 / 0.052), inset 0 -24px 58px rgb(0 0 0 / 0.16);
+  }
+
+  /* The same surface in its docked (push) state, minus the float-only lift.
+     Only the fill and the rim are re-skinned; the native slide/visibility
+     transition and the layout push are left alone. */
+  [data-dsh-aqua][data-dsh-float] [data-sidebar-right-panel] {
+    background: var(--dsh-aqua-glass-card-light);
+    border-left-color: rgba(255, 255, 255, 0.26);
+  }
+
+  [data-dsh-aqua][data-dsh-float] body[data-ds-dark-theme] [data-sidebar-right-panel] {
+    background: var(--dsh-aqua-glass-card-dark);
+    border-left-color: rgba(255, 255, 255, 0.16);
+  }
+}
+
+/* ---------- Layer fix for 0.19.x: dockkit floats belong below the dialog too ----------
+   The 0.18.x layer fix above drops the plugin host to z-index 9 so the
+   settings dialog (trapped in the sidebar column's float-mode stacking
+   context at z-index 10) always wins. 0.19.x mounts the right panel in the
+   native float host, which ships at z-index 60 and would therefore sit above
+   that dialog — the same bug the 0.18.x fix addressed, through a new layer.
+   Hold the new host at the same 9 so one rule keeps every panel layer under
+   the dialog, while the session header card (z-index 8) stays below it. */
+@media (min-width: 768px) {
+  [data-dsh-aqua][data-dsh-float] [data-sidebar-right-float-host] {
+    z-index: 9;
+  }
+}
+
+/* ---------- Layout push follows the float gap (0.19.x anchors) ----------
+   0.19.x writes only --dsh-sidebar-height (the right column pushes layout
+   itself as DSH's native Sidebar), and the shell frame/center column now
+   carry CSS-module hashes instead of the 0.18.x data attributes. Same intent
+   as the rules above: while the bottom panel is open, keep the center column
+   clear of the 12px float gap the glass now sits inside. */
+@media (min-width: 768px) {
+  [data-dsh-aqua][data-dsh-float] body:has([data-dsh-panel-host] > [class*='bottomPanel']:not([class*='bottomPanelHidden'])) [class*='centerCol'] {
+    margin-bottom: calc(var(--dsh-sidebar-height, 0px) + 12px);
+  }
+}
+
 /* ---------- Reduced motion: keep the static look, drop every effect. ---------- */
 @media (prefers-reduced-motion: reduce) {
   [data-dsh-float] [data-phase='hero'],
