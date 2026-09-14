@@ -100,6 +100,8 @@ async function main() {
     platform: 'browser',
     target: 'es2020',
     jsx: 'automatic',
+    minify: true,
+    legalComments: 'none',
     plugins: [cssModules, externalize],
     define: { 'process.env.NODE_ENV': '"production"' },
     outfile: join(root, 'lib', '.client-core.js'),
